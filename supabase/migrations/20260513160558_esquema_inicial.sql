@@ -144,3 +144,18 @@ create table public.reservas (
 insert into storage.buckets (id, name, public) values
   ('productos', 'productos', true),
   ('salas-vip', 'salas-vip', true);
+
+-- ============================================================
+-- RLS: habilitar en todas las tablas
+-- Sin ninguna política activa, una tabla con RLS habilitado
+-- deniega TODO el acceso. Las políticas van en la migración
+-- 20260513160559_politicas_rls.sql.
+-- ============================================================
+
+alter table public.perfiles      enable row level security;
+alter table public.mesas         enable row level security;
+alter table public.productos     enable row level security;
+alter table public.pedidos       enable row level security;
+alter table public.pedido_items  enable row level security;
+alter table public.salas_vip     enable row level security;
+alter table public.reservas      enable row level security;
