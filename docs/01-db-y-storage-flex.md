@@ -106,6 +106,51 @@ Guarda estos valores. Ahora mismo son los más importantes:
 | `service_role key` | La clave de admin, **solo en el servidor** |
 | `Studio URL` | El panel visual de la DB (como phpMyAdmin pero mejor) |
 
+### Posible error en Windows: puerto ocupado
+
+En Windows es frecuente que `npx supabase start` falle con un error similar a:
+
+```
+Error: failed to start docker container: ... port is already allocated
+```
+
+o bien que algún servicio no arranque porque el puerto ya está en uso por otro proceso del sistema.
+
+**Causa:** Windows tiene varios servicios propios (Hyper-V, IIS, SQL Server, etc.) que pueden ocupar los puertos por defecto de Supabase (54321, 54322, 54323…).
+
+**Solución:** cambiar los puertos en `supabase/config.toml`. Busca las líneas `port =` de cada servicio y asígnales valores distintos. Por ejemplo:
+
+```toml
+# supabase/config.toml
+
+[api]
+port = 57321      # cambia 54321 → 57321 (o cualquier puerto libre)
+
+[db]
+port = 57322
+shadow_port = 57320
+
+[studio]
+port = 57323
+
+[inbucket]
+port = 57324
+```
+
+Después de guardar el archivo, vuelve a ejecutar:
+
+```bash
+npx supabase start
+```
+
+Recuerda actualizar también el valor `NEXT_PUBLIC_SUPABASE_URL` en `.env.local` si cambias el puerto de la API:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=http://localhost:57321
+```
+
+---
+
 ### Crear el archivo `.env.local`
 
 En la raíz de tu proyecto Next.js crea el archivo `.env.local`:
