@@ -1,45 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   ShoppingCart, Crown, User, UserCircle, LayoutDashboard,
   ShieldCheck, QrCode, X, LayoutGrid,
 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
+import { useSesionStore } from '@/store/sesionStore'
+import { navParaRol } from '@/lib/navPorRol'
 
 const AUTH_ROUTES = ['/login', '/register']
 
-const NAV_CLIENTE = [
-  { icon: ShoppingCart, label: 'Pedir',   href: '/' },
-  { icon: Crown,        label: 'VIP',     href: '/vip' },
-  { icon: User,         label: 'Mi área', href: '/mi-area' },
-  { icon: UserCircle,   label: 'Perfil',  href: '/perfil' },
-]
-
-const NAV_GESTION = [
-  { icon: ShieldCheck,     label: 'Staff',    href: '/staff' },
-  { icon: QrCode,          label: 'Porteros', href: '/porteros' },
-  { icon: LayoutDashboard, label: 'Admin',    href: '/admin' },
-]
+const ICONOS = {
+  '/':         ShoppingCart,
+  '/vip':      Crown,
+  '/mi-area':  User,
+  '/staff':    ShieldCheck,
+  '/porteros': QrCode,
+  '/admin':    LayoutDashboard,
+}
 
 function BottomNav() {
   const pathname = usePathname()
   const [gestionAbierta, setGestionAbierta] = useState(false)
+  const rol = useSesionStore((s) => s.rol) ?? 'cliente'
+  const { cliente: navCliente, gestion: navGestion } = navParaRol(rol)
 
-  const gestionActiva = NAV_GESTION.some(i => i.href === pathname)
+  const itemsCliente = navCliente.map(i => ({ ...i, icon: ICONOS[i.href] }))
+  const itemsGestion = navGestion.map(i => ({ ...i, icon: ICONOS[i.href] }))
+  const hayGestion   = itemsGestion.length > 0
+  const gestionActiva = itemsGestion.some(i => i.href === pathname)
 
   return (
     <>
-      {/* Panel gestión */}
-      {gestionAbierta && (
+      {hayGestion && gestionAbierta && (
         <>
           <div className="lg:hidden fixed inset-0 z-30" onClick={() => setGestionAbierta(false)} />
           <div className="lg:hidden fixed bottom-20 inset-x-4 z-40 bg-zinc-900 border border-zinc-700 rounded-2xl p-2 shadow-2xl">
             <p className="text-zinc-600 text-xs font-semibold uppercase tracking-wider px-3 py-2">Gestión</p>
             <div className="grid grid-cols-3 gap-1">
-              {NAV_GESTION.map(({ icon: Icon, label, href }) => {
+              {itemsGestion.map(({ icon: Icon, label, href }) => {
                 const activo = pathname === href
                 return (
                   <Link
@@ -60,10 +62,8 @@ function BottomNav() {
         </>
       )}
 
-      {/* Barra inferior */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800 flex items-end">
-        {/* Los 4 de cliente */}
-        {NAV_CLIENTE.map(({ icon: Icon, label, href }) => {
+        {itemsCliente.map(({ icon: Icon, label, href }) => {
           const activo = pathname === href
           return (
             <Link key={href} href={href} className="flex-1 flex flex-col items-center py-3 gap-1">
@@ -73,23 +73,29 @@ function BottomNav() {
           )
         })}
 
-        {/* Botón gestión — central elevado */}
-        <button
-          onClick={() => setGestionAbierta(v => !v)}
-          className="flex-1 flex flex-col items-center -translate-y-3 gap-1"
-        >
-          <span className={`w-13 h-13 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-            gestionActiva || gestionAbierta ? 'bg-gold-500' : 'bg-zinc-800 hover:bg-zinc-700'
-          }`}>
-            {gestionAbierta
-              ? <X size={22} className={gestionActiva || gestionAbierta ? 'text-zinc-950' : 'text-zinc-300'} />
-              : <LayoutGrid size={22} className={gestionActiva || gestionAbierta ? 'text-zinc-950' : 'text-zinc-300'} />
-            }
-          </span>
-          <span className={`text-[10px] font-medium ${gestionActiva || gestionAbierta ? 'text-gold-400' : 'text-zinc-600'}`}>
-            Gestión
-          </span>
-        </button>
+        <Link href="/perfil" className="flex-1 flex flex-col items-center py-3 gap-1">
+          <UserCircle size={21} className={pathname === '/perfil' ? 'text-gold-400' : 'text-zinc-600'} />
+          <span className={`text-[10px] font-medium ${pathname === '/perfil' ? 'text-gold-400' : 'text-zinc-600'}`}>Perfil</span>
+        </Link>
+
+        {hayGestion && (
+          <button
+            onClick={() => setGestionAbierta(v => !v)}
+            className="flex-1 flex flex-col items-center -translate-y-3 gap-1"
+          >
+            <span className={`w-13 h-13 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+              gestionActiva || gestionAbierta ? 'bg-gold-500' : 'bg-zinc-800 hover:bg-zinc-700'
+            }`}>
+              {gestionAbierta
+                ? <X size={22} className={gestionActiva || gestionAbierta ? 'text-zinc-950' : 'text-zinc-300'} />
+                : <LayoutGrid size={22} className={gestionActiva || gestionAbierta ? 'text-zinc-950' : 'text-zinc-300'} />
+              }
+            </span>
+            <span className={`text-[10px] font-medium ${gestionActiva || gestionAbierta ? 'text-gold-400' : 'text-zinc-600'}`}>
+              Gestión
+            </span>
+          </button>
+        )}
       </nav>
     </>
   )
@@ -97,19 +103,26 @@ function BottomNav() {
 
 export default function Shell({ children }) {
   const pathname = usePathname()
+  const router   = useRouter()
+  const { usuario, cargando } = useSesionStore()
+
+  useEffect(() => {
+    if (!cargando && !usuario && !AUTH_ROUTES.includes(pathname)) {
+      router.replace('/login')
+    }
+  }, [cargando, usuario, pathname])
 
   if (AUTH_ROUTES.includes(pathname)) return <>{children}</>
 
+  if (cargando || !usuario) return null
+
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar solo desktop */}
       <div className="hidden lg:block">
         <Sidebar />
       </div>
 
-      {/* Área principal */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Header móvil con logo */}
         <header className="lg:hidden flex items-center justify-center px-4 py-3 bg-zinc-950 border-b border-zinc-800/60 shrink-0">
           <span className="font-display italic font-bold text-gold-400 text-2xl tracking-widest">FLEX</span>
         </header>
@@ -119,7 +132,6 @@ export default function Shell({ children }) {
         </main>
       </div>
 
-      {/* Bottom nav móvil */}
       <BottomNav />
     </div>
   )

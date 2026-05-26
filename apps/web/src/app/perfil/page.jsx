@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Camera, Lock, Bell, Shield, LogOut, CheckCircle, CreditCard, Plus, Trash2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useSesionStore } from '@/store/sesionStore'
 
 const TABS = [
   { id: 'personal',       label: 'Datos personales' },
@@ -36,6 +39,8 @@ export default function PaginaPerfil() {
     fechaNac: '1995-08-14',
   })
 
+  const router = useRouter()
+  const { limpiarSesion } = useSesionStore()
   const [pass, setPass] = useState({ actual: '', nueva: '', confirmar: '' })
 
   const [tarjetas, setTarjetas]   = useState(TARJETAS_INIT)
@@ -69,11 +74,27 @@ export default function PaginaPerfil() {
     setTimeout(() => setGuardado(false), 2500)
   }
 
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    limpiarSesion()
+    router.push('/login')
+  }
+
   return (
     <div className="p-4 sm:p-8 max-w-2xl">
-      <div className="mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-zinc-100">Mi perfil</h1>
-        <p className="text-zinc-500 text-sm mt-1">Gestiona tu cuenta y preferencias</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-zinc-100">Mi perfil</h1>
+          <p className="text-zinc-500 text-sm mt-1">Gestiona tu cuenta y preferencias</p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 border border-zinc-700 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-xl text-sm transition-colors shrink-0"
+        >
+          <LogOut size={15} />
+          Cerrar sesión
+        </button>
       </div>
 
       {/* Avatar */}
@@ -331,9 +352,18 @@ export default function PaginaPerfil() {
               <h3 className="text-zinc-100 font-semibold text-sm">Zona de peligro</h3>
             </div>
             <p className="text-zinc-500 text-xs mb-4">Estas acciones son irreversibles.</p>
-            <button className="px-4 py-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-xl text-sm transition-colors">
-              Eliminar cuenta
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 border border-zinc-700 text-zinc-300 hover:bg-zinc-800 rounded-xl text-sm transition-colors w-fit"
+              >
+                <LogOut size={15} />
+                Cerrar sesión
+              </button>
+              <button className="px-4 py-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-xl text-sm transition-colors w-fit">
+                Eliminar cuenta
+              </button>
+            </div>
           </div>
         </div>
       )}

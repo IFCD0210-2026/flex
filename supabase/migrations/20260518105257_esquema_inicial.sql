@@ -110,3 +110,8 @@ insert into public.salas_vip (nombre, descripcion, capacidad, precio_hora) value
 
 ALTER TABLE public.perfiles     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.salas_vip     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mesas         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pedido_items  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pedidos       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.productos     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reservas      ENABLE ROW LEVEL SECURITY;

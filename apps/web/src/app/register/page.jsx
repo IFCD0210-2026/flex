@@ -1,19 +1,52 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FlexLogo from '@/components/FlexLogo'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PaginaRegister() {
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmar: '' })
+  const router = useRouter()
+  const [form, setForm]     = useState({ nombre: '', email: '', password: '', confirmar: '' })
+  const [error, setError]   = useState('')
+  const [cargando, setCargando] = useState(false)
   const set = k => e => setForm(prev => ({ ...prev, [k]: e.target.value }))
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError('')
+
+    if (form.password !== form.confirmar) {
+      setError('Las contraseñas no coinciden.')
+      return
+    }
+    if (form.password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.')
+      return
+    }
+
+    setCargando(true)
+    const supabase = createClient()
+
+    const { error: authError } = await supabase.auth.signUp({
+      email:    form.email,
+      password: form.password,
+      options:  { data: { nombre: form.nombre } },
+    })
+
+    setCargando(false)
+
+    if (authError) { setError(authError.message); return }
+
+    router.push('/')
+  }
 
   return (
     <div className="min-h-screen flex">
-      {/* Panel izquierdo — foto */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=1200&auto=format&fit=crop&q=80"
+          src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&auto=format&fit=crop&q=80"
           alt="Flex Club"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -25,11 +58,10 @@ export default function PaginaRegister() {
         </div>
       </div>
 
-      {/* Panel derecho — formulario */}
       <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 bg-zinc-950">
         <div className="lg:hidden absolute inset-0 -z-10">
           <img
-            src="https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&auto=format&fit=crop&q=80"
+            src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80"
             alt=""
             className="w-full h-full object-cover opacity-20"
           />
@@ -43,7 +75,13 @@ export default function PaginaRegister() {
           <h1 className="text-2xl font-bold text-zinc-100 mb-1">Crea tu cuenta</h1>
           <p className="text-zinc-500 text-sm mb-8">Empieza a disfrutar de Flex esta noche</p>
 
-          <form className="space-y-4" onSubmit={e => e.preventDefault()}>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3 mb-4">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="text-zinc-500 text-xs block mb-1.5">Nombre completo</label>
               <input
@@ -51,6 +89,7 @@ export default function PaginaRegister() {
                 placeholder="Alex García"
                 value={form.nombre}
                 onChange={set('nombre')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -61,6 +100,7 @@ export default function PaginaRegister() {
                 placeholder="tu@email.com"
                 value={form.email}
                 onChange={set('email')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -71,6 +111,7 @@ export default function PaginaRegister() {
                 placeholder="Mínimo 8 caracteres"
                 value={form.password}
                 onChange={set('password')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -81,6 +122,7 @@ export default function PaginaRegister() {
                 placeholder="••••••••"
                 value={form.confirmar}
                 onChange={set('confirmar')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -94,9 +136,10 @@ export default function PaginaRegister() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl transition-colors"
+              disabled={cargando}
+              className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors"
             >
-              Crear cuenta
+              {cargando ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>
           </form>
 
