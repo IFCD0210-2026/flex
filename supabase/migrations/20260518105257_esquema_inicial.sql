@@ -17,7 +17,7 @@ create or replace function public.handle_new_user()
   as $$
   begin
   insert into public.perfiles (id, nombre)
-  values (new.id, new.raw_user_meta_data->>'full_name');
+  values (new.id, new.raw_user_meta_data->>'nombre');
   return new;
 end;
 $$;

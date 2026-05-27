@@ -8,3 +8,4 @@
 
 apps/web/node_modules
 apps/web/.env.local
+apps/web/.next

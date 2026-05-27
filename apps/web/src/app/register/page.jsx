@@ -8,8 +8,8 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function PaginaRegister() {
   const router = useRouter()
-  const [form, setForm]     = useState({ nombre: '', email: '', password: '', confirmar: '' })
-  const [error, setError]   = useState('')
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmar: '' })
+  const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
   const set = k => e => setForm(prev => ({ ...prev, [k]: e.target.value }))
 
@@ -30,9 +30,9 @@ export default function PaginaRegister() {
     const supabase = createClient()
 
     const { error: authError } = await supabase.auth.signUp({
-      email:    form.email,
+      email: form.email,
       password: form.password,
-      options:  { data: { nombre: form.nombre } },
+      options: { data: { nombre: form.nombre } },
     })
 
     setCargando(false)
