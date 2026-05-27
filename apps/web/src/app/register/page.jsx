@@ -53,7 +53,7 @@ export default function PaginaRegister() {
         <div className="absolute inset-0 bg-linear-to-r from-zinc-950/60 to-zinc-950/10" />
         <div className="absolute bottom-12 left-10 right-10">
           <p className="text-white/80 text-xl font-light italic leading-relaxed">
-            "Únete a la experiencia<br />más exclusiva de la ciudad."
+            Únete a la experiencia<br />más exclusiva de la ciudad.
           </p>
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function PaginaRegister() {
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3 mb-4">
-              {error}
+              Errorcito: {error}
             </div>
           )}
 
