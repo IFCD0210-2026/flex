@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 
+
 const AUTH_ROUTES = ['/login', '/register']
 
 const NAV_CLIENTE = [
@@ -95,6 +96,7 @@ function BottomNav() {
 
 export default function Shell({ children }) {
   const pathname = usePathname()
+  //const router = useRouter()
 
   if (AUTH_ROUTES.includes(pathname)) return <>{children}</>
 
