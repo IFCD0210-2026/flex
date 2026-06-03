@@ -1,12 +1,46 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FlexLogo from '@/components/FlexLogo'
+import { supabase } from '@/lib/supabase/client'
 
 export default function PaginaRegister() {
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmar: '' })
+  const router = useRouter()
+  const [form, setForm]   = useState({ nombre: '', email: '', password: '', confirmar: '' })
+  const [error, setError] = useState('')
+  const [cargando, setCargando] = useState(false)
   const set = k => e => setForm(prev => ({ ...prev, [k]: e.target.value }))
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError('')
+
+    if (form.password !== form.confirmar) {
+      setError('Las contraseñas no coinciden.')
+      return
+    }
+    if (form.password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.')
+      return
+    }
+
+    setCargando(true)
+    // const supabase = supabase()
+
+    const { error: authError } = await supabase.auth.signUp({
+      email:    form.email,
+      password: form.password,
+      options:  { data: { nombre: form.nombre } },  // metadatos para el trigger
+    })
+
+    setCargando(false)
+
+    if (authError) { setError(authError.message); return }
+
+    router.push('/')
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -43,7 +77,13 @@ export default function PaginaRegister() {
           <h1 className="text-2xl font-bold text-zinc-100 mb-1">Crea tu cuenta</h1>
           <p className="text-zinc-500 text-sm mb-8">Empieza a disfrutar de Flex esta noche</p>
 
-          <form className="space-y-4" onSubmit={e => e.preventDefault()}>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3 mb-4">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="text-zinc-500 text-xs block mb-1.5">Nombre completo</label>
               <input
@@ -51,6 +91,7 @@ export default function PaginaRegister() {
                 placeholder="Alex García"
                 value={form.nombre}
                 onChange={set('nombre')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -61,6 +102,7 @@ export default function PaginaRegister() {
                 placeholder="tu@email.com"
                 value={form.email}
                 onChange={set('email')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -71,6 +113,7 @@ export default function PaginaRegister() {
                 placeholder="Mínimo 8 caracteres"
                 value={form.password}
                 onChange={set('password')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -81,6 +124,7 @@ export default function PaginaRegister() {
                 placeholder="••••••••"
                 value={form.confirmar}
                 onChange={set('confirmar')}
+                required
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -94,9 +138,11 @@ export default function PaginaRegister() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl transition-colors"
+              disabled={cargando}
+              className="text-white bg-amber-400"
+              // className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors"
             >
-              Crear cuenta
+              {cargando ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>
           </form>
 
