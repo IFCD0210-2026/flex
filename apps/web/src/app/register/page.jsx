@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import FlexLogo from '@/components/FlexLogo'
-import { supabase } from '@/lib/actions/client'
+import FlexLogo from '@/components/layout/FlexLogo'
 import { register } from '@/lib/actions/auth'
 
 
