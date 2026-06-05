@@ -2,6 +2,7 @@
 
 import { useCarritoStore } from '@/store/carritoStore'
 import { Plus, Minus } from 'lucide-react'
+import Image from 'next/image'
 
 export default function ProductoCard({ producto }) {
   const { items, agregarItem, quitarItem } = useCarritoStore()
@@ -11,7 +12,8 @@ export default function ProductoCard({ producto }) {
     <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 flex flex-col gap-3">
       <div className="h-36 rounded-lg overflow-hidden bg-zinc-800">
         {producto.imagen_url ? (
-          <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
+          // <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
+          <Image src={producto.imagen_url} width={200} height={200} alt={producto.nombre} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-600 text-xs">Sin imagen</div>
         )}
