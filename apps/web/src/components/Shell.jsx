@@ -9,7 +9,6 @@ const AUTH_ROUTES = ['/login', '/register']
 
 export default function Shell({ children, rol, nombre }) {
   const pathname = usePathname()
-  //const router = useRouter()
 
   // Si estamos en la página de login o register, no necesitamos Menú de navegación
   if (AUTH_ROUTES.includes(pathname)) return <>{children}</>
@@ -31,7 +30,7 @@ export default function Shell({ children, rol, nombre }) {
         </main>
       </div>
 
-      <BottomNav rol={rol} />
+      <BottomNav rol={rol}/>
     </div>
   )
 }

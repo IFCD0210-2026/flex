@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FlexLogo from '@/components/FlexLogo'
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/lib/actions/client'
 import { register } from '@/lib/actions/auth'
 
 

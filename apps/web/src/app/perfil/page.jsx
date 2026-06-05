@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/actions/server'
 import PerfilClient from './PerfilClient'
 
 export default async function PaginaPerfil() {

@@ -2,14 +2,14 @@
 'use client'
 
 import { useEffect } from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '../lib/actions/client'
 import { useSesionStore } from '@/store/sesionStore'
 
 export function IniciarSesion() {
   const { setSesion, limpiarSesion } = useSesionStore()
 
   useEffect(() => {
-    
+    const supabase = createClient()
 
     // Comprueba si ya hay sesión activa
     supabase.auth.getSession().then(async ({ data: { session } }) => {

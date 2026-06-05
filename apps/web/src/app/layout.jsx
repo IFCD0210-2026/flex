@@ -2,6 +2,20 @@ import './globals.css'
 import { Playfair_Display, Raleway } from 'next/font/google'
 import Shell from '@/components/Shell'
 import { IniciarSesion } from '@/components/IniciarSesion'
+import { createClient } from '@/lib/actions/server'
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair', // Variable CSS para Tailwind
+})
+
+const raleway = Raleway({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-raleway', // Variable CSS para Tailwind
+})
+
 
 export const metadata = {
   title: 'Flex — Live Sessions',
@@ -16,8 +30,8 @@ export default async function RootLayout({ children }) {
   let nombre = null
   if (user) {
     const { data: perfil } = await supabase
-      .from('perfiles')
-      .select('rol')
+      .from('auth.users')
+      .select('')
       .eq('id', user.id)
       .single()
     rol = perfil?.rol ?? 'cliente'
@@ -27,8 +41,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="es" className={`${playfair.variable} ${raleway.variable}`} suppressHydrationWarning>
       <body>
-        <IniciarSesion />
-        <Shell>{children}</Shell>
+        <Shell rol={rol} nombre={nombre}>{children}</Shell>
       </body>
     </html>
   )
