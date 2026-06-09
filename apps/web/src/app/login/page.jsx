@@ -95,7 +95,7 @@ export default function PaginaLogin() {
             <button
               type="submit"
               disabled={cargando}
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors mt-2"
+              className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed bg-amber-600 text-zinc-950 font-bold rounded-xl transition-colors mt-2"
             >
               {cargando ? 'Entrando…' : 'Entrar'}
             </button>

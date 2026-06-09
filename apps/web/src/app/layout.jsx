@@ -29,8 +29,8 @@ export default async function RootLayout({ children }) {
   let nombre = null
   if (user) {
     const { data: perfil } = await supabase
-      .from('auth.users')
-      .select('')
+      .from('perfiles')
+      .select('rol')
       .eq('id', user.id)
       .single()
     rol = perfil?.rol ?? 'cliente'

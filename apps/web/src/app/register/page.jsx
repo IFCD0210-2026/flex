@@ -136,7 +136,7 @@ export default function PaginaRegister() {
             <button
               type="submit"
               disabled={cargando}
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors"
+              className="w-full py-3 bg-gold-500 bg-amber-600 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors"
             >
               {cargando ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>

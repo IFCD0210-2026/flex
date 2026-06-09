@@ -1,27 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2 } from 'lucide-react'
 import ModalUsuario from './ModalUsuario'
+import { editarPerfiles, guardarEdicion } from '@/lib/actions/perfiles'
+import ModalUsuarioEditar from './ModalUsuarioEditar'
 
 const USUARIOS_INIT = [
-  { id: 1, nombre: 'Alex García',  email: 'alex@flex.es',   rol: 'Cliente',  activo: true  },
-  { id: 2, nombre: 'Sara Martín',  email: 'sara@flex.es',   rol: 'Staff',    activo: true  },
-  { id: 3, nombre: 'Carlos Ruiz',  email: 'carlos@flex.es', rol: 'Portero',  activo: true  },
-  { id: 4, nombre: 'Laura Pérez',  email: 'laura@flex.es',  rol: 'Cliente',  activo: false },
+  { id: 1, nombre: 'Alex García', email: 'alex@flex.es', rol: 'Cliente', activo: true },
+  { id: 2, nombre: 'Sara Martín', email: 'sara@flex.es', rol: 'Staff', activo: true },
+  { id: 3, nombre: 'Carlos Ruiz', email: 'carlos@flex.es', rol: 'Portero', activo: true },
+  { id: 4, nombre: 'Laura Pérez', email: 'laura@flex.es', rol: 'Cliente', activo: false },
 ]
 
 const ROL_COLOR = {
   Cliente: 'bg-blue-500/20 text-blue-400',
-  Staff:   'bg-amber-500/20 text-amber-400',
+  Staff: 'bg-amber-500/20 text-amber-400',
   Portero: 'bg-purple-500/20 text-purple-400',
-  Admin:   'bg-red-500/20 text-red-400',
+  Admin: 'bg-red-500/20 text-red-400',
 }
 
 export default function TabUsuarios({ onUsuariosChange }) {
   const [usuarios, setUsuarios] = useState(USUARIOS_INIT)
-  const [modal, setModal]       = useState(false)
-  const [formU, setFormU]       = useState({ nombre: '', email: '', rol: 'Cliente' })
+  const [modal, setModal] = useState(false)
+
+  const [modalEditar, setModalEditar] = useState(false)
+  const [usuarioEditando, setUsuarioEditando] = useState(null)
+
+  const [formU, setFormU] = useState({ nombre: '', email: '', rol: 'Cliente' })
+  const [formUE, setFormUE] = useState({ nombre: '', rol: '' })
 
   function crear() {
     if (!formU.nombre || !formU.email) return
@@ -29,8 +36,16 @@ export default function TabUsuarios({ onUsuariosChange }) {
     setUsuarios(nuevos)
     onUsuariosChange?.(nuevos)
     setFormU({ nombre: '', email: '', rol: 'Cliente' })
-    setModal(false)
+
   }
+
+  function editar(){
+    const editados = usuarios.filter((u) => u.id !== id)
+
+  }
+
+
+
 
   function eliminar(id) {
     const nuevos = usuarios.filter((u) => u.id !== id)
@@ -77,6 +92,9 @@ export default function TabUsuarios({ onUsuariosChange }) {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
+                  <button onClick={() => editar(u)} className="text-zinc-600 px-5 hover:text-red-400 transition-colors">
+                    <Edit size={15} />
+                  </button>
                   <button onClick={() => eliminar(u.id)} className="text-zinc-600 hover:text-red-400 transition-colors">
                     <Trash2 size={15} />
                   </button>
@@ -92,7 +110,17 @@ export default function TabUsuarios({ onUsuariosChange }) {
           formU={formU}
           setFormU={setFormU}
           onCreate={crear}
-          onClose={() => setModal(false)}
+          onClose={() => setModalCrear(false)}
+        />
+      )}
+
+      {/* MODAL EDITAR */}
+      {modalEditar && (
+        <ModalUsuarioEditar
+          formU={formUE}
+          setFormU={setFormUE}
+          onCreate={guardarEdicion}
+          onClose={() => setModalEditar(false)}
         />
       )}
     </div>

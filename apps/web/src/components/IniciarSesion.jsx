@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createClient } from '../lib/actions/client'
+import { createClient } from '../lib/supabase/client'
 import { useSesionStore } from '@/store/sesionStore'
 
 export function IniciarSesion() {

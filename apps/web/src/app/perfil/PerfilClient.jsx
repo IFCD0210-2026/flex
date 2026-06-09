@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Camera, Lock, Bell, Shield, LogOut, CheckCircle, CreditCard, Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/actions/client'
+import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/lib/actions/auth'
 
 const TABS = [

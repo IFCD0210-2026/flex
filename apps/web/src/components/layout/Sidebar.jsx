@@ -41,11 +41,14 @@ function NavGroup({ title, items, pathname }) {
   )
 }
 
+
 const LABEL_ROL = { cliente: 'Cliente', staff: 'Staff', portero: 'Portero', admin: 'Admin' }
 
 export default function Sidebar({ rol, nombre }) {
   const pathname = usePathname()
   const itemsGestion = NAV_STAFF.filter(i => i.roles.includes(rol))
+
+  console.log('ROL ACTUAL:', rol)
 
   return (
     <aside className="w-64 h-full bg-zinc-900 border-r border-zinc-800 flex flex-col">
@@ -57,6 +60,7 @@ export default function Sidebar({ rol, nombre }) {
         <NavGroup title="Cliente" items={NAV_CLIENTE} pathname={pathname} />
         {itemsGestion.length > 0 && (
           <NavGroup title="Gestión" items={itemsGestion} pathname={pathname} />
+          
         )}
       </nav>
 
@@ -70,6 +74,7 @@ export default function Sidebar({ rol, nombre }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-zinc-100 truncate">{nombre}</p>
           <p className="text-xs text-zinc-500">{LABEL_ROL[rol] ?? 'Cliente'}</p>
+          {/* <p className="text-xs text-zinc-500">{LABEL_ROL.filter(rol)}</p> */}
         </div>
         <ChevronUp size={14} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
       </Link>
