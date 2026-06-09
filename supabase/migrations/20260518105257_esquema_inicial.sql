@@ -4,10 +4,11 @@ create table public.perfiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   nombre     text,
   rol        text not null default 'cliente'
-             check (rol in ('cliente', 'staff', 'admin')),
+             check (rol in ('cliente', 'staff', 'admin', 'portero')),
   avatar_url text,
   creado_en  timestamptz not null default now()
 );
+
 
 create or replace function public.handle_new_user()
   returns trigger
@@ -107,3 +108,5 @@ insert into public.salas_vip (nombre, descripcion, capacidad, precio_hora) value
   ) where (estado not in ('cancelada'))
 );
 
+ALTER TABLE public.perfiles     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.salas_vip     ENABLE ROW LEVEL SECURITY;
