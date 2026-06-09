@@ -28,5 +28,3 @@ update public.productos set imagen_url = 'http://localhost:54321/storage/v1/obje
 update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/tabla-quesos.jpg'      where nombre = 'Tabla de quesos';
 update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/alitas-bbq.jpg'        where nombre = 'Alitas BBQ';
 update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/burger-flex.jpg'       where nombre = 'Burger Flex';
-
-http://127.0.0.1:54321/storage/v1/object/public/productos/agua-mineral.jpg

@@ -1,22 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Camera, Lock, Bell, Shield, LogOut, CheckCircle, CreditCard, Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/lib/actions/auth'
+import { actualizarPerfil, actualizarAvatar, actualizarContrasena } from '@/lib/actions/miCuenta'
 
 const TABS = [
   { id: 'personal', label: 'Datos personales' },
-  { id: 'pago', label: 'Pago' },
+  // { id: 'pago', label: 'Pago' },
   { id: 'seguridad', label: 'Seguridad' },
   { id: 'notificaciones', label: 'Notificaciones' },
 ]
 
-const TARJETAS_INIT = [
-  { id: 1, tipo: 'Visa', ultimos: '4242', expira: '12/27', predeterminada: true },
-  { id: 2, tipo: 'Mastercard', ultimos: '8210', expira: '09/26', predeterminada: false },
-]
+// const TARJETAS_INIT = [
+//   { id: 1, tipo: 'Visa', ultimos: '4242', expira: '12/27', predeterminada: true },
+//   { id: 2, tipo: 'Mastercard', ultimos: '8210', expira: '09/26', predeterminada: false },
+// ]
 
 const LABEL_ROL = { cliente: 'Cliente', staff: 'Staff', portero: 'Portero', admin: 'Admin' }
 
@@ -26,17 +27,24 @@ function iconoRed(tipo) {
 }
 
 export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
-  const [tab, setTab] = useState('personal')
+  const [tab, setTab]     = useState('personal')
   const [guardado, setGuardado] = useState(false)
+  const [error, setError] = useState(null)
   const [avatar, setAvatar] = useState(avatarUrl)
+  const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
   const [perfil, setPerfil] = useState({ nombre, email, telefono: '', fechaNac: '' })
   const [pass, setPass] = useState({ actual: '', nueva: '', confirmar: '' })
-  const [tarjetas, setTarjetas] = useState(TARJETAS_INIT)
-  const [nuevaTarjeta, setNuevaTarjeta] = useState(false)
+  // const [tarjetas, setTarjetas] = useState(TARJETAS_INIT)
+  // const [nuevaTarjeta, setNuevaTarjeta] = useState(false)
   const [formTarjeta, setFormTarjeta] = useState({ numero: '', titular: '', expira: '', cvv: '' })
   const [notifs, setNotifs] = useState({ pedidos: true, entradas: true, ofertas: false, vip: true, newsletter: false })
+
+  function mostrarGuardado() {
+    setGuardado(true)
+    setTimeout(() => setGuardado(false), 2500)
+  }
 
   async function handleLogout() {
     const supabase = createClient()
@@ -44,22 +52,70 @@ export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
     router.push('/login')
   }
 
-  function agregarTarjeta(e) {
-    e.preventDefault()
-    const ultimos = formTarjeta.numero.replace(/\s/g, '').slice(-4)
-    const tipo = formTarjeta.numero.startsWith('4') ? 'Visa' : 'Mastercard'
-    setTarjetas(prev => [...prev, { id: Date.now(), tipo, ultimos, expira: formTarjeta.expira, predeterminada: false }])
-    setFormTarjeta({ numero: '', titular: '', expira: '', cvv: '' })
-    setNuevaTarjeta(false)
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setAvatar(URL.createObjectURL(file))
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const ext    = file.name.split('.').pop()
+    const path   = `${user.id}/avatar.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatares')
+      .upload(path, file, { upsert: true, contentType: file.type })
+
+    if (uploadError) { setError(uploadError.message); return }
+
+    const { data } = supabase.storage.from('avatares').getPublicUrl(path)
+    await actualizarAvatar(data.publicUrl)
+    setAvatar(data.publicUrl)
   }
 
-  function eliminarTarjeta(id) { setTarjetas(prev => prev.filter(t => t.id !== id)) }
+  function guardarPerfil(e) {
+    e.preventDefault()
+    setError(null)
+    startTransition(async () => {
+      try {
+        await actualizarPerfil({ nombre: perfil.nombre })
+        mostrarGuardado()
+      } catch (err) {
+        setError(err.message)
+      }
+    })
+  }
+
+  function guardarContrasena(e) {
+    e.preventDefault()
+    setError(null)
+    startTransition(async () => {
+      try {
+        await actualizarContrasena({ nueva: pass.nueva, confirmar: pass.confirmar })
+        setPass({ actual: '', nueva: '', confirmar: '' })
+        mostrarGuardado()
+      } catch (err) {
+        setError(err.message)
+      }
+    })
+  }
+
+  // function agregarTarjeta(e) {
+  //   e.preventDefault()
+  //   const ultimos = formTarjeta.numero.replace(/\s/g, '').slice(-4)
+  //   const tipo = formTarjeta.numero.startsWith('4') ? 'Visa' : 'Mastercard'
+  //   setTarjetas(prev => [...prev, { id: Date.now(), tipo, ultimos, expira: formTarjeta.expira, predeterminada: false }])
+  //   setFormTarjeta({ numero: '', titular: '', expira: '', cvv: '' })
+  //   setNuevaTarjeta(false)
+  // }
+
+  // function eliminarTarjeta(id) { setTarjetas(prev => prev.filter(t => t.id !== id)) }
   function predeterminar(id) { setTarjetas(prev => prev.map(t => ({ ...t, predeterminada: t.id === id }))) }
 
   function guardar(e) {
     e.preventDefault()
-    setGuardado(true)
-    setTimeout(() => setGuardado(false), 2500)
+    mostrarGuardado()
   }
 
   return (
@@ -89,10 +145,7 @@ export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
           </div>
           <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-gold-500 hover:bg-gold-600 rounded-full flex items-center justify-center cursor-pointer transition-colors">
             <Camera size={13} className="text-zinc-950" />
-            <input type="file" accept="image/*" className="hidden" onChange={e => {
-              const f = e.target.files?.[0]
-              if (f) setAvatar(URL.createObjectURL(f))
-            }} />
+            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           </label>
         </div>
         <div>
@@ -123,10 +176,15 @@ export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
           <CheckCircle size={16} /> Cambios guardados correctamente
         </div>
       )}
+      {error && (
+        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 mb-6">
+          {error}
+        </div>
+      )}
 
       {/* Personal */}
       {tab === 'personal' && (
-        <form onSubmit={guardar} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+        <form onSubmit={guardarPerfil} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { key: 'nombre', label: 'Nombre completo', type: 'text' },
@@ -155,14 +213,14 @@ export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
               className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-100 outline-none focus:border-gold-500 transition-colors"
             />
           </div>
-          <button type="submit" className="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl text-sm transition-colors">
-            Guardar cambios
+          <button type="submit" disabled={isPending} className="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-zinc-950 font-bold rounded-xl text-sm transition-colors">
+            {isPending ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </form>
       )}
 
       {/* Pago */}
-      {tab === 'pago' && (
+      {/* {tab === 'pago' && (
         <div className="space-y-4">
           {tarjetas.map(t => (
             <div key={t.id} className={`bg-zinc-900 border rounded-2xl p-5 flex items-center gap-4 ${t.predeterminada ? 'border-gold-500/50' : 'border-zinc-800'}`}>
@@ -257,12 +315,12 @@ export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
             </button>
           )}
         </div>
-      )}
+      )} */}
 
       {/* Seguridad */}
       {tab === 'seguridad' && (
         <div className="space-y-4">
-          <form onSubmit={guardar} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+          <form onSubmit={guardarContrasena} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Lock size={16} className="text-gold-400" />
               <h3 className="text-zinc-100 font-semibold text-sm">Cambiar contraseña</h3>
@@ -280,8 +338,8 @@ export default function PerfilClient({ nombre, email, rol, avatarUrl }) {
                 />
               </div>
             ))}
-            <button type="submit" className="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl text-sm transition-colors">
-              Actualizar contraseña
+            <button type="submit" disabled={isPending} className="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-zinc-950 font-bold rounded-xl text-sm transition-colors">
+              {isPending ? 'Guardando…' : 'Actualizar contraseña'}
             </button>
           </form>
 
