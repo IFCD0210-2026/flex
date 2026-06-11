@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
+
 // Cliente "a pelo" con la service_role key: esta ruta no tiene sesión de
 // usuario (la llama nuestro propio servidor), así que saltamos las RLS.
 const supabase = createClient(

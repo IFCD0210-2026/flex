@@ -111,7 +111,7 @@ export default function CarritoDrawer({ mesas = [] }) {
         </div>
 
         {items.length > 0 && (
-          <div className="px-4 py-4 border-t border-zinc-800">
+          <div className="px-4 py-4 pb-24 border-t border-zinc-800">
             {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
             <div className="flex justify-between items-center mb-4">
               <span className="text-zinc-400 text-sm">Total</span>
@@ -119,7 +119,7 @@ export default function CarritoDrawer({ mesas = [] }) {
             </div>
             <button
               onClick={() => { setError(null); setModalMesa(true) }}
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl transition-colors"
+              className="w-full py-3 bg-amber-400 hover:bg-amber-500 text-zinc-950 font-bold rounded-xl transition-colors"
             >
               Enviar pedido
             </button>
@@ -175,7 +175,7 @@ export default function CarritoDrawer({ mesas = [] }) {
               <button
                 onClick={handleConfirmarPedido}
                 disabled={!mesaSel || enviando}
-                className="flex-1 py-2.5 bg-gold-500 hover:bg-gold-600 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl text-sm transition-colors"
+                className="flex-1 py-2.5 bg-amber-400 hover:bg-gold-600 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl text-sm transition-colors"
               >
                 {enviando ? 'Redirigiendo a pago…' : mesaSel ? `Pagar · Mesa ${mesaSel.numero}` : 'Confirmar'}
               </button>

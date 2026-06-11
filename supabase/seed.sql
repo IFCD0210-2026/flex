@@ -25,7 +25,7 @@ insert into public.productos (nombre, descripcion, precio, categoria, disponible
 -- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/zumo-naranja.jpg'      where nombre = 'Zumo de naranja';
 -- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/nachos-guacamole.jpg'  where nombre = 'Nachos con guacamole';
 -- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/patatas-bravas.jpg'    where nombre = 'Patatas bravas';
--- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/tabla-quesos.jpg'      where nombre = 'Tabla de quesos';
+-- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/tablas-quesos.jpg'      where nombre = 'Tabla de quesos';
 -- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/alitas-bbq.jpg'        where nombre = 'Alitas BBQ';
 -- update public.productos set imagen_url = 'http://localhost:54321/storage/v1/object/public/productos/burger-flex.jpg'       where nombre = 'Burger Flex';
 

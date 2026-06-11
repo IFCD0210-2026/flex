@@ -31,12 +31,12 @@ export default function ProductoCard({ producto }) {
               onClick={() => quitarItem(producto.id)}
               className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center hover:bg-zinc-600 transition-colors"
             >
-              <Minus size={13} />
+              <Minus size={13} className="text-zinc-950" />
             </button>
             <span className="text-zinc-100 text-sm w-5 text-center font-medium">{enCarrito.cantidad}</span>
             <button
               onClick={() => agregarItem(producto)}
-              className="w-7 h-7 rounded-full bg-gold-500 flex items-center justify-center hover:bg-gold-600 transition-colors"
+              className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center hover:bg-zinc-600 transition-colors"
             >
               <Plus size={13} className="text-zinc-950" />
             </button>
@@ -44,7 +44,7 @@ export default function ProductoCard({ producto }) {
         ) : (
           <button
             onClick={() => agregarItem(producto)}
-            className="flex items-center gap-1 px-3 py-1 bg-gold-500 hover:bg-gold-600 text-zinc-950 text-xs font-semibold rounded-lg transition-colors"
+            className="flex items-center gap-1 px-3 py-1 bg-amber-400 hover:bg-gold-600 text-zinc-950 text-xs font-semibold rounded-lg transition-colors"
           >
             <Plus size={12} /> Añadir
           </button>

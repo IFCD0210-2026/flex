@@ -38,8 +38,8 @@ export default async function RootLayout({ children }) {
     if (perfil?.activo === false) redirect('/cuenta-desactivada')
     rol       = perfil?.rol ?? 'cliente'
     nombre    = perfil?.nombre ?? user.user_metadata?.nombre ?? user.email
-    avatarUrl = perfil?.avatar_url ?? null
-  }
+    avatarUrl = perfil?.avatar_url ?? null }
+ 
 
   return (
     <html lang="es" className={`${playfair.variable} ${raleway.variable}`} suppressHydrationWarning>
