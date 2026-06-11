@@ -20,6 +20,7 @@ const raleway = Raleway({
 export const metadata = {
   title: 'Flex — Live Sessions',
   description: 'Tu noche, tu ritmo',
+  manifest: '/manifest.json',
 }
 
 export default async function RootLayout({ children }) {

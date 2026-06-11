@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
-import { login } from '../lib/actions/auth'
+import FlexLogo from '@/components/layout/FlexLogo'
+import { login } from '@/lib/actions/auth'
+import Image from 'next/image'
 
 export default function PaginaLogin() {
   const [mostrarPassword, setMostrarPassword] = useState(false)
@@ -28,15 +29,40 @@ export default function PaginaLogin() {
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-56px)] md:min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="bg-zinc-800 border border-zinc-700 rounded-3xl p-8 shadow-2xl">
-          
-          {/* Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="h-16 w-16 rounded-2xl bg-amber-600 flex items-center justify-center text-2xl font-bold">
-              F
-            </div>
+    <div className="min-h-screen flex">
+      {/* Panel izquierdo — foto */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        <Image
+          width={400}
+          height={400}
+          src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&auto=format&fit=crop&q=80"
+          alt="Ambiente Flex"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-zinc-950/60 to-zinc-950/10" />
+        <div className="absolute bottom-12 left-10 right-10">
+          <p className="text-white/80 text-xl font-light italic leading-relaxed">
+            La noche que siempre<br />quisiste vivir.
+          </p>
+        </div>
+      </div>
+
+      {/* Panel derecho — formulario */}
+      <div className="flex-1 flex flex-col justify-center items-center px-8 py-12 bg-zinc-950">
+        <div className="lg:hidden absolute inset-0 -z-10">
+          <Image
+            width={400}
+            height={400}
+            loading="eager"
+            src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80"
+            alt=""
+            className="w-full h-full object-cover opacity-20"
+          />
+        </div>
+
+        <div className="w-full max-w-sm">
+          <div className="mb-10 flex justify-center">
+            <FlexLogo className="h-12 w-auto" />
           </div>
 
           <h1 className="text-3xl font-bold text-center">
