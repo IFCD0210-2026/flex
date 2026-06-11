@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import PedidoCard from './PedidoCard'
 import { avanzarPedido } from '@/lib/actions/pedidos'
+import { createClient } from '@/lib/supabase/client'
 
 const FILTROS = ['todos', 'pendiente', 'en_barra', 'listo', 'entregado']
 
@@ -18,6 +19,50 @@ export default function StaffClient({ pedidosIniciales }) {
   const [pedidos, setPedidos]     = useState(pedidosIniciales)
   const [filtro, setFiltro]       = useState('todos')
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    // Un canal es como una sala de escucha — le damos un nombre único
+    // para identificarlo y poder cerrarlo después
+    const channel = supabase
+      .channel('pedidos-staff')
+
+      // INSERT: llega cuando un cliente hace un pedido nuevo.
+      // El payload solo trae las columnas directas de la fila (sin mesas, sin ítems),
+      // así que hacemos una query adicional para obtener el pedido completo con relaciones.
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, async (payload) => {
+        const { data } = await supabase
+          .from('pedidos')
+          .select(`
+            id, estado, creado_en,
+            mesas ( numero ),
+            perfiles ( nombre ),
+            pedido_items ( cantidad, productos ( nombre ) )
+          `)
+          .eq('id', payload.new.id)
+          .single()
+        if (data) setPedidos(prev => [...prev, data])
+      })
+
+      // UPDATE: llega cuando otro staff avanza el estado de un pedido desde otro dispositivo.
+      // Solo actualizamos el estado — el resto del pedido (mesa, ítems) no ha cambiado.
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, (payload) => {
+        setPedidos(prev => prev.map(p => p.id === payload.new.id ? { ...p, estado: payload.new.estado } : p))
+      })
+
+      // DELETE: llega si un pedido se elimina (por ejemplo, cancelado desde admin).
+      // Lo quitamos de la lista por su id.
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'pedidos' }, (payload) => {
+        setPedidos(prev => prev.filter(p => p.id !== payload.old.id))
+      })
+
+      .subscribe()
+
+    // Al desmontar el componente (staff cambia de página) cerramos el canal.
+    // Sin esto la conexión WebSocket quedaría abierta en memoria indefinidamente.
+    return () => supabase.removeChannel(channel)
+  }, [])
 
   function avanzar(id, estadoActual) {
     const SIGUIENTE = { pendiente: 'en_barra', en_barra: 'listo', listo: 'entregado' }
