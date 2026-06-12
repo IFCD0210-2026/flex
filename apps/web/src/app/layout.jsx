@@ -44,7 +44,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="es" className={`${playfair.variable} ${raleway.variable}`} suppressHydrationWarning>
-      <body>
+      <body className="bg-zinc-900">
         <Shell rol={rol} nombre={nombre} avatarUrl={avatarUrl}>{children}</Shell>
       </body>
     </html>
