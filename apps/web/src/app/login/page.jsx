@@ -5,6 +5,7 @@ import Link from 'next/link'
 import FlexLogo from '@/components/layout/FlexLogo'
 import { login } from '@/lib/actions/auth'
 import Image from 'next/image'
+import { Mail } from "lucide-react"
 
 export default function PaginaLogin() {
   const [mostrarPassword, setMostrarPassword] = useState(false)
