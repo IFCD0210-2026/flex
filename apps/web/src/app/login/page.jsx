@@ -5,27 +5,46 @@ import Link from 'next/link'
 import FlexLogo from '@/components/layout/FlexLogo'
 import { login } from '@/lib/actions/auth'
 import Image from 'next/image'
-import { Mail } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 
 export default function PaginaLogin() {
   const [mostrarPassword, setMostrarPassword] = useState(false)
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
 
+  // async function handleSubmit(e) {
+  //   e.preventDefault()
+
+  //   setError('')
+  //   setCargando(true)
+
+  //   const formData = new FormData(e.target)
+
+  //   const result = await login(formData)
+
+  //   setCargando(false)
+
+  //   if (result?.error) {
+  //     setError(result.error)
+  //   }
+  // }
+
   async function handleSubmit(e) {
     e.preventDefault()
 
-    setError('')
-    setCargando(true)
+    try {
+      setError('')
+      setCargando(true)
 
-    const formData = new FormData(e.target)
+      const formData = new FormData(e.target)
+      const result = await login(formData)
 
-    const result = await login(formData)
+      if (result?.error) setError(result.error)
 
-    setCargando(false)
-
-    if (result?.error) {
-      setError(result.error)
+    } catch (err) {
+      setError('Error inesperado')
+    } finally {
+      setCargando(false)
     }
   }
 
