@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useTransition, useCallback } from 'react'
+import { useState, useTransition, useCallback, useEffect } from 'react'
 import { CheckCircle, XCircle, Search, Camera, Keyboard } from 'lucide-react'
-import { verificarEntrada } from '@/lib/actions/portero'
+import { verificarEntrada, obtenerHistorial } from '@/lib/actions/portero'
 import CamaraScanner from '@/components/portero/CamaraScanner'
 
 export default function PaginaPorteros() {
@@ -11,6 +11,10 @@ export default function PaginaPorteros() {
   const [resultado, setResultado] = useState(null)
   const [historial, setHistorial] = useState([])
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    obtenerHistorial().then(setHistorial)
+  }, [])
 
   function procesar(token) {
     const t = token.trim()

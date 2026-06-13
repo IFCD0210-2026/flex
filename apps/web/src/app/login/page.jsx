@@ -5,21 +5,47 @@ import Link from 'next/link'
 import FlexLogo from '@/components/layout/FlexLogo'
 import { login } from '@/lib/actions/auth'
 import Image from 'next/image'
+import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 
 export default function PaginaLogin() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [mostrarPassword, setMostrarPassword] = useState(false)
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
 
+  // async function handleSubmit(e) {
+  //   e.preventDefault()
+
+  //   setError('')
+  //   setCargando(true)
+
+  //   const formData = new FormData(e.target)
+
+  //   const result = await login(formData)
+
+  //   setCargando(false)
+
+  //   if (result?.error) {
+  //     setError(result.error)
+  //   }
+  // }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    setError('')
-    setCargando(true)
-    const formData = new FormData(e.target)
-    const result = await login(formData)
-    setCargando(false)
-    if (result?.error) setError(result.error)
+
+    try {
+      setError('')
+      setCargando(true)
+
+      const formData = new FormData(e.target)
+      const result = await login(formData)
+
+      if (result?.error) setError(result.error)
+
+    } catch (err) {
+      setError('Error inesperado')
+    } finally {
+      setCargando(false)
+    }
   }
 
   return (
@@ -59,60 +85,123 @@ export default function PaginaLogin() {
             <FlexLogo className="h-12 w-auto" />
           </div>
 
-          <h1 className="text-2xl font-bold text-zinc-100 mb-1">Bienvenido de nuevo</h1>
-          <p className="text-zinc-500 text-sm mb-8">Accede a tu cuenta Flex</p>
+          <h1 className="text-3xl font-bold text-center">
+            Bienvenido
+          </h1>
+
+          <p className="text-zinc-400 text-center mt-2 mb-8">
+            Inicia sesión para continuar
+          </p>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl px-4 py-3 mb-4">
+            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
               {error}
             </div>
           )}
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Email */}
             <div>
-              <label className="text-zinc-500 text-xs block mb-1.5">Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="tu@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
-              />
+              <label className="text-sm text-zinc-400 mb-2 block">
+                Correo electrónico
+              </label>
+
+              <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+                />
+
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="correo@email.com"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 py-3 pl-11 pr-4 outline-none focus:border-amber-500 transition"
+                />
+              </div>
             </div>
+
+            {/* Password */}
             <div>
-              <label className="text-zinc-500 text-xs block mb-1.5">Contraseña</label>
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-gold-500 transition-colors"
-              />
+              <label className="text-sm text-zinc-400 mb-2 block">
+                Contraseña
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+                />
+
+                <input
+                  type={mostrarPassword ? 'text' : 'password'}
+                  name="password"
+                  required
+                  placeholder="••••••••"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 py-3 pl-11 pr-12 outline-none focus:border-amber-500 transition"
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMostrarPassword(!mostrarPassword)
+                  }
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                >
+                  {mostrarPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-end">
-              <a href="#" className="text-xs text-gold-500 hover:text-gold-400">¿Olvidaste tu contraseña?</a>
+              <Link
+                href="/recuperar-password"
+                className="text-sm text-amber-500 hover:text-amber-400"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
             </div>
 
             <button
-              type="submit"
               disabled={cargando}
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors mt-2"
+              className="
+                w-full
+                rounded-xl
+                bg-amber-600
+                py-3
+                font-semibold
+                text-black
+                transition
+                hover:bg-amber-500
+                disabled:opacity-50
+              "
             >
-              {cargando ? 'Entrando…' : 'Entrar'}
+              {cargando ? (
+                <span className="flex justify-center items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  Entrando...
+                </span>
+              ) : (
+                'Entrar'
+              )}
             </button>
           </form>
 
-          <p className="text-center text-zinc-500 text-sm mt-8">
+          <div className="mt-8 text-center text-zinc-400">
             ¿No tienes cuenta?{' '}
-            <Link href="/register" className="text-gold-400 hover:text-gold-300 font-medium">
-              Regístrate
+            <Link
+              href="/register"
+              className="font-semibold text-amber-500 hover:text-amber-400"
+            >
+              Crear cuenta
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

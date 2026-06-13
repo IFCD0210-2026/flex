@@ -25,6 +25,7 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Firma inválida' }, { status: 400 })
   }
 
+  
   const session = evento.data.object
   const { tipo, id } = session.metadata ?? {}
 

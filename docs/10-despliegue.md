@@ -125,11 +125,32 @@ git push origin main
 
 ## Paso 6 — Crear el proyecto en Vercel
 
+### El archivo vercel.json
+
+El código de la app vive en `apps/web/`, no en la raíz del repositorio. Cuando Vercel clona el repo y busca qué desplegar, empieza desde la raíz — y ahí no hay ningún proyecto Next.js, solo carpetas.
+
+El archivo `apps/web/vercel.json` resuelve esto:
+
+```json
+{
+  "framework": "nextjs"
+}
+```
+
+Al colocarlo dentro de `apps/web/`, le indicamos a Vercel que esa carpeta es la raíz del proyecto y que el framework es Next.js, para que aplique la configuración de build correcta (rutas de API, SSR, etc.).
+
+Sin este archivo, Vercel intentaría construir desde la raíz del repo y fallaría al no encontrar el `package.json` de Next.js.
+
+> En la UI de Vercel esto se configura al importar el proyecto: **Root Directory → `apps/web`**. El `vercel.json` refuerza esa configuración directamente desde el código.
+
+### Crear el proyecto
+
 1. Ve a [vercel.com](https://vercel.com) e inicia sesión con tu cuenta de GitHub
 2. Pulsa **Add New → Project**
 3. Elige tu repositorio de GitHub
-4. Vercel detectará que es un proyecto Next.js automáticamente
-5. Antes de pulsar **Deploy**, expande **Environment Variables** y añade todas las variables
+4. En **Root Directory** escribe `apps/web`
+5. Vercel detectará el `vercel.json` y configurará el framework automáticamente
+6. Antes de pulsar **Deploy**, expande **Environment Variables** y añade todas las variables
 
 ### Variables de entorno que necesitas en Vercel
 
@@ -195,16 +216,46 @@ Si usas un dominio personalizado, recuerda actualizar también la URL del webhoo
 
 ---
 
+## Probar la PWA en producción
+
+El service worker y la instalación PWA están **desactivados en desarrollo** a propósito — el caché agresivo interfiere con los cambios de código. En local verás este mensaje en la consola del servidor, que es normal:
+
+```text
+○ (pwa) PWA support is disabled
+```
+
+Para probar la PWA necesitas el deploy en Vercel (HTTPS real). Una vez desplegado:
+
+1. Abre la URL desde tu móvil
+2. Inicia sesión — al entrar en la app aparecerá automáticamente el **popup de instalación**
+3. En Android/Chrome pulsa **Instalar** para añadirla a la pantalla de inicio
+4. En iPhone/Safari el popup muestra instrucciones manuales (Safari no permite instalación automática)
+
+> El popup solo aparece una vez por sesión. Si lo cerraste sin instalar y quieres verlo de nuevo, abre una pestaña de incógnito o borra el `sessionStorage` desde las DevTools.
+
+### Desarrollo local con Turbopack
+
+Para el día a día usa Turbopack — es significativamente más rápido que Webpack:
+
+```bash
+npm run dev        # arranca con --turbopack
+```
+
+El build de producción (`npm run build`) sigue usando Webpack, que es lo que Vercel ejecuta al desplegar.
+
+---
+
 ## Probar en móvil
 
-Con la app en Vercel ya tienes HTTPS real. Abre la URL desde tu móvil y verás el banner de instalación de la PWA. Acepta y la app se instalará en la pantalla de inicio.
+Con la app en Vercel ya tienes HTTPS real. Abre la URL desde tu móvil, inicia sesión y el popup de instalación aparecerá solo.
 
 Para probar el escáner de QR del portero:
 
 1. Abre `/porteros` en el móvil
-2. Pulsa **Cámara** y acepta el permiso
-3. Apunta al QR de una entrada válida
-4. Debería aparecer "ENTRADA VÁLIDA" en verde
+2. Pulsa **Cámara** y acepta el permiso — la cámara trasera arranca directamente
+3. Apunta al QR de una entrada válida — debería aparecer "ENTRADA VÁLIDA" en verde
+4. Escanea el mismo QR otra vez — debería aparecer "Entrada ya utilizada"
+5. Al recargar la página, el historial de entradas del día se carga desde la base de datos
 
 ---
 
@@ -224,6 +275,16 @@ git commit -m "descripción del cambio"
 git push origin main
 # Vercel detecta el push y despliega automáticamente en ~1 minuto
 ```
+
+### Migraciones pendientes
+
+Si el cambio incluye nuevas migraciones en `supabase/migrations/`, aplícalas antes de desplegar el código:
+
+```bash
+npx supabase db push
+```
+
+Si no lo haces, el código en producción intentará leer o escribir columnas que aún no existen en la base de datos y fallará.
 
 ---
 

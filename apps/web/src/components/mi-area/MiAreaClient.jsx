@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, ShoppingBag, QrCode } from 'lucide-react'
 
@@ -31,7 +32,9 @@ function formatFecha(iso) {
 }
 
 export default function MiAreaClient({ perfil, pedidos, reservas }) {
-  const [tab, setTab] = useState('pedidos')
+  const searchParams = useSearchParams()
+  const tabInicial = TABS.some(t => t.id === searchParams.get('tab')) ? searchParams.get('tab') : 'pedidos'
+  const [tab, setTab] = useState(tabInicial)
 
   return (
     <div className="p-4 sm:p-8">

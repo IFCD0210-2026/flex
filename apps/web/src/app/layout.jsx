@@ -6,15 +6,16 @@ import { redirect } from 'next/navigation'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
-  variable: '--font-playfair',
   display: 'swap',
+  variable: '--font-playfair', // Variable CSS para Tailwind
 })
 
 const raleway = Raleway({
   subsets: ['latin'],
-  variable: '--font-raleway',
   display: 'swap',
+  variable: '--font-raleway', // Variable CSS para Tailwind
 })
+
 
 export const metadata = {
   title: 'Flex — Live Sessions',
@@ -38,8 +39,8 @@ export default async function RootLayout({ children }) {
     if (perfil?.activo === false) redirect('/cuenta-desactivada')
     rol       = perfil?.rol ?? 'cliente'
     nombre    = perfil?.nombre ?? user.user_metadata?.nombre ?? user.email
-    avatarUrl = perfil?.avatar_url ?? null
-  }
+    avatarUrl = perfil?.avatar_url ?? null }
+ 
 
   return (
     <html lang="es" className={`${playfair.variable} ${raleway.variable}`} suppressHydrationWarning>

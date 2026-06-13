@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react'
 import { Trash2, Edit2 } from 'lucide-react'
 import { editarPerfil, borrarPerfil } from '@/lib/actions/adminPerfiles'
 import ModalUsuario from './ModalUsuario'
+import { editarPerfiles, guardarEdicion } from '@/lib/actions/perfiles'
+import ModalUsuarioEditar from './ModalUsuarioEditar'
 
 const ROL_COLOR = {
   cliente: 'bg-blue-500/20 text-blue-400',

@@ -1,13 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FlexLogo from '@/components/layout/FlexLogo'
 import { register } from '@/lib/actions/auth'
 import Image from 'next/image'
 
+
+
+
 export default function PaginaRegister() {
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmar: '' })
+
+  const [form, setForm]   = useState({ nombre: '', email: '', password: '', confirmar: '' })
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
   const set = k => e => setForm(prev => ({ ...prev, [k]: e.target.value }))
@@ -137,7 +142,7 @@ export default function PaginaRegister() {
             <button
               type="submit"
               disabled={cargando}
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors"
+              className="w-full py-3 bg-gold-500 bg-amber-600 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-xl transition-colors"
             >
               {cargando ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>
