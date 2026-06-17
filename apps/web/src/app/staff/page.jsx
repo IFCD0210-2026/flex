@@ -7,7 +7,7 @@ export default async function PaginaStaff() {
   const { data: pedidos } = await supabase
     .from('pedidos')
     .select(`
-      id, estado, creado_en,
+      id, estado, estado_pago, creado_en,
       mesas ( numero ),
       perfiles ( nombre ),
       pedido_items (
@@ -15,6 +15,7 @@ export default async function PaginaStaff() {
         productos ( nombre )
       )
     `)
+    .eq('estado_pago', 'pagado')
     .not('estado', 'eq', 'cancelado')
     .order('creado_en', { ascending: true })
 

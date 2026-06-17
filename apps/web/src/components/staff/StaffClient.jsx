@@ -8,60 +8,102 @@ import { createClient } from '@/lib/supabase/client'
 const FILTROS = ['todos', 'pendiente', 'en_barra', 'listo', 'entregado']
 
 const LABEL_FILTRO = {
-  todos:    'Todos',
+  todos: 'Todos',
   pendiente: 'Pendiente',
-  en_barra:  'Preparando',
-  listo:     'Listo',
+  en_barra: 'Preparando',
+  listo: 'Listo',
   entregado: 'Entregado',
 }
 
+const PEDIDO_SELECT = `
+  id, estado, estado_pago, creado_en,
+  mesas ( numero ),
+  perfiles ( nombre ),
+  pedido_items ( cantidad, productos ( nombre ) )
+`
+
+function ordenarPorCreacion(lista) {
+  return [...lista].sort((a, b) => new Date(a.creado_en) - new Date(b.creado_en))
+}
+
 export default function StaffClient({ pedidosIniciales }) {
-  const [pedidos, setPedidos]     = useState(pedidosIniciales)
-  const [filtro, setFiltro]       = useState('todos')
+  const [pedidos, setPedidos] = useState(() => ordenarPorCreacion(pedidosIniciales))
+  const [filtro, setFiltro] = useState('todos')
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     const supabase = createClient()
+    let activo = true
 
-    // Un canal es como una sala de escucha — le damos un nombre único
-    // para identificarlo y poder cerrarlo después
+    function insertarOActualizar(pedido) {
+      setPedidos(prev => ordenarPorCreacion([
+        ...prev.filter(p => p.id !== pedido.id),
+        pedido,
+      ]))
+    }
+
+    function quitarPedido(id) {
+      setPedidos(prev => prev.filter(p => p.id !== id))
+    }
+
+    async function cargarPedidoPagado(id) {
+      const { data, error } = await supabase
+        .from('pedidos')
+        .select(PEDIDO_SELECT)
+        .eq('id', id)
+        .eq('estado_pago', 'pagado')
+        .not('estado', 'eq', 'cancelado')
+        .maybeSingle()
+
+      if (!activo) return
+
+      if (data) insertarOActualizar(data)
+      if (!data && !error) quitarPedido(id)
+    }
+
     const channel = supabase
       .channel('pedidos-staff')
 
-      // INSERT: llega cuando un cliente hace un pedido nuevo.
-      // El payload solo trae las columnas directas de la fila (sin mesas, sin ítems),
-      // así que hacemos una query adicional para obtener el pedido completo con relaciones.
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, async (payload) => {
-        const { data } = await supabase
-          .from('pedidos')
-          .select(`
-            id, estado, creado_en,
-            mesas ( numero ),
-            perfiles ( nombre ),
-            pedido_items ( cantidad, productos ( nombre ) )
-          `)
-          .eq('id', payload.new.id)
-          .single()
-        if (data) setPedidos(prev => [...prev, data])
+        if (payload.new.estado_pago === 'pagado') {
+          await cargarPedidoPagado(payload.new.id)
+        }
       })
 
-      // UPDATE: llega cuando otro staff avanza el estado de un pedido desde otro dispositivo.
-      // Solo actualizamos el estado — el resto del pedido (mesa, ítems) no ha cambiado.
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, (payload) => {
-        setPedidos(prev => prev.map(p => p.id === payload.new.id ? { ...p, estado: payload.new.estado } : p))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, async (payload) => {
+        if (payload.new.estado_pago !== 'pagado' || payload.new.estado === 'cancelado') {
+          quitarPedido(payload.new.id)
+          return
+        }
+
+        let yaExiste = false
+        setPedidos(prev => {
+          yaExiste = prev.some(p => p.id === payload.new.id)
+          return prev.map(p => p.id === payload.new.id
+            ? { ...p, estado: payload.new.estado, estado_pago: payload.new.estado_pago }
+            : p
+          )
+        })
+
+        if (!yaExiste) {
+          await cargarPedidoPagado(payload.new.id)
+        }
       })
 
-      // DELETE: llega si un pedido se elimina (por ejemplo, cancelado desde admin).
-      // Lo quitamos de la lista por su id.
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'pedidos' }, (payload) => {
-        setPedidos(prev => prev.filter(p => p.id !== payload.old.id))
+        quitarPedido(payload.old.id)
+      })
+
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedido_items' }, async (payload) => {
+        await cargarPedidoPagado(payload.new.pedido_id)
       })
 
       .subscribe()
 
-    // Al desmontar el componente (staff cambia de página) cerramos el canal.
-    // Sin esto la conexión WebSocket quedaría abierta en memoria indefinidamente.
-    return () => supabase.removeChannel(channel)
+    return () => {
+      activo = false
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   function avanzar(id, estadoActual) {
@@ -69,23 +111,21 @@ export default function StaffClient({ pedidosIniciales }) {
     const siguiente = SIGUIENTE[estadoActual]
     if (!siguiente) return
 
-    // Optimistic update
     setPedidos(prev => prev.map(p => p.id === id ? { ...p, estado: siguiente } : p))
 
     startTransition(async () => {
       try {
         await avanzarPedido(id, estadoActual)
       } catch {
-        // Revert on error
         setPedidos(prev => prev.map(p => p.id === id ? { ...p, estado: estadoActual } : p))
       }
     })
   }
 
   const pedidosFiltrados = filtro === 'todos' ? pedidos : pedidos.filter(p => p.estado === filtro)
-  const pendientes  = pedidos.filter(p => p.estado === 'pendiente').length
-  const preparando  = pedidos.filter(p => p.estado === 'en_barra').length
-  const listos      = pedidos.filter(p => p.estado === 'listo').length
+  const pendientes = pedidos.filter(p => p.estado === 'pendiente').length
+  const preparando = pedidos.filter(p => p.estado === 'en_barra').length
+  const listos = pedidos.filter(p => p.estado === 'listo').length
   const completados = pedidos.filter(p => p.estado === 'entregado').length
 
   return (
@@ -102,7 +142,6 @@ export default function StaffClient({ pedidosIniciales }) {
         )}
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
           <p className="text-zinc-500 text-xs">Total</p>
@@ -122,7 +161,6 @@ export default function StaffClient({ pedidosIniciales }) {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {FILTROS.map(f => (
           <button
@@ -137,7 +175,6 @@ export default function StaffClient({ pedidosIniciales }) {
         ))}
       </div>
 
-      {/* Lista pedidos */}
       <div className="space-y-3">
         {pedidosFiltrados.map(pedido => (
           <PedidoCard key={pedido.id} pedido={pedido} onAvanzar={avanzar} />
