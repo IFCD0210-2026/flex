@@ -10,12 +10,17 @@ export async function avanzarPedido(id, estadoActual) {
   if (!siguiente) return
 
   const supabase = await createClient()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('pedidos')
-    .update({ estado: siguiente })
+    .update({ estado: siguiente, actualizado: new Date().toISOString() })
     .eq('id', id)
+    .eq('estado', estadoActual)
+    .eq('estado_pago', 'pagado')
+    .select('id')
+    .maybeSingle()
 
   if (error) throw new Error(error.message)
+  if (!data) throw new Error('El pedido ya cambio de estado o aun no esta pagado')
   revalidatePath('/staff')
 }
 

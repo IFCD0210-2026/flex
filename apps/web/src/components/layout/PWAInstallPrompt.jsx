@@ -12,7 +12,7 @@ function isInStandaloneMode() {
 
 export default function PWAInstallPrompt() {
   const [show, setShow] = useState(false)
-  const [isIos, setIsIos] = useState(false)
+  const [isIos] = useState(() => typeof navigator !== 'undefined' && isIOS())
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
   useEffect(() => {
@@ -20,14 +20,13 @@ export default function PWAInstallPrompt() {
     if (isInStandaloneMode()) return
     if (sessionStorage.getItem('pwa-prompt-shown')) return
 
-    const ios = isIOS()
-    setIsIos(ios)
-
-    if (ios) {
+    if (isIos) {
       // En iOS no hay beforeinstallprompt, mostramos instrucciones manuales
-      setShow(true)
-      sessionStorage.setItem('pwa-prompt-shown', '1')
-      return
+      const timeout = window.setTimeout(() => {
+        setShow(true)
+        sessionStorage.setItem('pwa-prompt-shown', '1')
+      }, 0)
+      return () => window.clearTimeout(timeout)
     }
 
     const handler = (e) => {
@@ -39,7 +38,7 @@ export default function PWAInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handler)
     return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
+  }, [isIos])
 
   async function handleInstall() {
     if (!deferredPrompt) return
@@ -77,7 +76,7 @@ export default function PWAInstallPrompt() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-gold-400 font-bold shrink-0">2.</span>
-                <span>Selecciona <strong className="text-zinc-100">"Agregar a inicio"</strong></span>
+                <span>Selecciona <strong className="text-zinc-100">&quot;Agregar a inicio&quot;</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-gold-400 font-bold shrink-0">3.</span>

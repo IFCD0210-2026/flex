@@ -118,12 +118,13 @@ export default function CarritoDrawer({ mesas = [] }) {
               <span className="text-zinc-400 text-sm">Total</span>
               <span className="text-zinc-100 font-bold text-xl">{total.toFixed(2)} €</span>
             </div>
-            <button
-              onClick={() => { setError(null); setModalMesa(true) }}
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl transition-colors"
-            >
-              Enviar pedido
-            </button>
+          <button
+  onClick={() => { setError(null); setModalMesa(true) }}
+  className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-zinc-950 font-bold rounded-xl transition-colors
+             sticky bottom-0 sm:static"
+>
+  Enviar pedido
+</button>
           </div>
         )}
       </div>
