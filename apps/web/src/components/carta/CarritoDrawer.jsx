@@ -45,7 +45,7 @@ export default function CarritoDrawer({ mesas = [] }) {
       {/* Botón flotante */}
       <button
         onClick={() => setCarritoAbierto(true)}
-        className="fixed top-20 right-10 md:top-auto md:bottom-6 md:right-6 z-50 w-14 h-14 bg-gold-500 hover:bg-gold-600 text-zinc-950 rounded-full shadow-lg flex items-center justify-center transition-colors"
+        className={`fixed top-20 right-10 md:top-auto md:bottom-6 md:right-6 z-50 w-14 h-14 bg-gold-500 hover:bg-gold-600 text-zinc-950 rounded-full shadow-lg flex items-center justify-center transition-colors ${carritoAbierto ? 'hidden' : ''}`}
       >
         <ShoppingCart size={22} />
         {totalItems > 0 && (
@@ -62,7 +62,7 @@ export default function CarritoDrawer({ mesas = [] }) {
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 right-0 z-30 w-full sm:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col transition-transform duration-300 ${
+        className={`fixed inset-y-0 right-0 z-30 w-full sm:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col transition-transform duration-300 pb-16 sm:pb-0 ${
           carritoAbierto ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -130,9 +130,9 @@ export default function CarritoDrawer({ mesas = [] }) {
 
       {/* Modal selector de mesa */}
       {modalMesa && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/70" onClick={() => setModalMesa(false)} />
-          <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
+          <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-sm mx-4 mb-20 sm:mb-0 shadow-2xl">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-lg font-bold text-zinc-100">¿En qué mesa estás?</h2>
               <button onClick={() => setModalMesa(false)} className="text-zinc-500 hover:text-zinc-100">
